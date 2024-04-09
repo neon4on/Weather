@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getWeatherByCity } from '../services/weatherAPI';
+import { getWeatherByCity, getTemperatureDataByCity } from '../services/weatherAPI';
+import TemperatureChart from './TemperatureChart';
 
 function WeatherInfo() {
   const { cityName } = useParams();
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [temperatureData, setTemperatureData] = useState([]);
 
   useEffect(() => {
     const fetchWeatherData = async () => {
@@ -24,7 +26,17 @@ function WeatherInfo() {
       }
     };
 
+    const fetchTemperatureData = async () => {
+      try {
+        const data = await getTemperatureDataByCity(cityName);
+        setTemperatureData(data);
+      } catch (error) {
+        console.error('Error fetching temperature data:', error);
+      }
+    };
+
     fetchWeatherData();
+    fetchTemperatureData();
   }, [cityName]);
 
   if (loading) {
@@ -42,9 +54,9 @@ function WeatherInfo() {
   return (
     <div>
       <h2>{weatherData.name}</h2>
-      <p>Температура: {weatherData.main.temp}°C</p>
-      <p>Описание: {weatherData.weather[0].description}</p>
-      {/* Отобразите другие данные о погоде */}
+      <p>Temperature: {weatherData.main.temp}°C</p>
+      <p>Description: {weatherData.weather[0].description}</p>
+      <TemperatureChart temperatureData={temperatureData} />
     </div>
   );
 }

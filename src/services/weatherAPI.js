@@ -12,3 +12,22 @@ export const getWeatherByCity = async (city) => {
     throw error;
   }
 };
+
+export const getTemperatureDataByCity = async (city) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/forecast?q=${city}&appid=${API_KEY}&units=metric`,
+    );
+    const temperatureData = response.data.list
+      .filter((data) => data.dt_txt.includes('12:00:00'))
+      .map((data) => ({
+        date: data.dt_txt.split(' ')[0],
+        temperature: data.main.temp,
+      }))
+      .slice(0, 5);
+    return temperatureData;
+  } catch (error) {
+    console.error('Error fetching temperature data:', error);
+    throw error;
+  }
+};
